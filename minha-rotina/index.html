@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1f7a55">
+<meta name="description" content="Checklist diário, evolução e agenda da semana.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Rotina">
+<title>Minha Rotina</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/png" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&display=swap">
+</head>
+<body>
+<div class="wrap">
+  <div class="boot" id="boot">Carregando…</div>
+
+  <!-- LOGIN -->
+  <section class="login" id="view-login" hidden>
+    <img class="logo" src="/icon-192.png" alt="">
+    <div><div class="eyebrow">Minha Rotina</div><h1 id="loginTitle">Entrar</h1></div>
+    <p class="note" id="loginLead">Entre com seu e-mail e senha. O mesmo acesso funciona no celular e no computador.</p>
+    <form id="loginForm" novalidate>
+      <label for="loginEmail">E-mail<input class="field" id="loginEmail" type="email" autocomplete="email" inputmode="email" required></label>
+      <label for="loginPass">Senha<input class="field" id="loginPass" type="password" autocomplete="current-password" minlength="6" required></label>
+      <button class="btn primary" id="loginSubmit" type="submit">Entrar</button>
+      <div class="msg" id="loginMsg" role="status"></div>
+    </form>
+    <button class="linkbtn" id="loginToggle" type="button">Primeiro acesso? Criar conta</button>
+  </section>
+
+  <section class="login" id="view-config" hidden>
+    <div><div class="eyebrow">Minha Rotina</div><h1>Falta configurar o Supabase</h1></div>
+    <p class="note">As variáveis VITE_SUPABASE_URL e VITE_SUPABASE_KEY não foram encontradas. Cadastre as duas no Vercel (Settings &gt; Environment Variables) e publique de novo, como explica o guia LEIA-ME.</p>
+  </section>
+
+  <div class="topbar" id="topbar" hidden>
+    <div class="brand"><img src="/icon-192.png" alt="">Minha Rotina</div>
+    <button class="sync" id="sync" data-s="ok" type="button" title="Sincronizar agora"><i></i><span id="syncTxt">Sincronizado</span></button>
+  </div>
+  <div class="alert" id="alert" hidden></div>
+
+  <!-- HOJE -->
+  <main id="view-hoje" class="view" hidden style="display:flex;flex-direction:column;gap:20px">
+    <header class="daynav">
+      <button class="btn icon" id="prev" type="button" aria-label="Dia anterior">‹</button>
+      <div class="lbl"><div class="eyebrow" id="dayTag">Hoje</div><h1 id="dayTitle">Checklist do dia</h1></div>
+      <button class="btn icon" id="next" type="button" aria-label="Próximo dia">›</button>
+      <button class="btn" id="today" type="button">Hoje</button>
+    </header>
+    <section class="score" id="score" aria-live="polite">
+      <div class="ring" aria-hidden="true">
+        <svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="52" fill="none" stroke-width="12"/><circle class="bar" id="ringBar" cx="60" cy="60" r="52" fill="none" stroke-width="12" stroke-linecap="round" stroke-dasharray="326.73" stroke-dashoffset="326.73"/></svg>
+        <div class="pct num" id="pct">0%</div>
+      </div>
+      <div>
+        <div class="msg" id="msg">Um item de cada vez. Comece pelo próximo.</div>
+        <div class="sub num" id="sub">0 de 0 concluídas</div>
+        <div class="next" id="nextBox" hidden></div>
+      </div>
+      <div class="done-banner">Dia completo. Isso é constância.</div>
+    </section>
+    <div id="blocks" style="display:flex;flex-direction:column;gap:20px"></div>
+    <p class="quote">Não busco perfeição, mas constância.</p>
+  </main>
+
+  <!-- EVOLUÇÃO -->
+  <main id="view-evolucao" class="view" hidden style="display:flex;flex-direction:column;gap:20px">
+    <header><div class="eyebrow">Evolução</div><h1>Sua constância</h1></header>
+    <section class="stats">
+      <div class="stat"><div class="v num" id="streak">0</div><div class="k">dias seguidos (80% ou mais)</div></div>
+      <div class="stat"><div class="v num" id="best">0</div><div class="k">melhor sequência</div></div>
+      <div class="stat"><div class="v num" id="perfect">0</div><div class="k">dias 100% completos</div></div>
+    </section>
+    <section class="card">
+      <div class="block-h"><h2>Últimos 7 dias</h2><span class="note num" id="weekAvg"></span></div>
+      <div class="week" id="week"></div>
+    </section>
+    <section class="card">
+      <div class="block-h"><h2>Constância por área</h2><span class="note">últimos 7 dias</span></div>
+      <div class="bars" id="areas"></div>
+    </section>
+    <section class="card">
+      <h2>Últimas 12 semanas</h2>
+      <div class="heat" id="heat"></div>
+      <div class="legend"><span>menos</span><i style="background:var(--line)"></i><i style="background:color-mix(in srgb,var(--accent) 30%,var(--line))"></i><i style="background:color-mix(in srgb,var(--accent) 60%,var(--line))"></i><i style="background:var(--accent)"></i><span>mais</span></div>
+      <p class="note">Toque num quadrado para abrir aquele dia. Dá para marcar depois um dia que ficou sem registro.</p>
+    </section>
+    <section class="card">
+      <h2>Guardar o histórico</h2>
+      <p class="note">O histórico fica salvo na sua conta e aparece em todos os aparelhos. Se quiser, baixe uma cópia extra, ou traga o histórico da versão antiga do arquivo usando "Restaurar de uma cópia".</p>
+      <div class="toolbar">
+        <button class="btn primary" type="button" id="exportBtn">Baixar cópia de segurança</button>
+        <label class="btn" for="importFile" style="display:inline-flex;align-items:center">Restaurar de uma cópia</label>
+        <input type="file" id="importFile" accept="application/json,.json" hidden>
+      </div>
+      <p class="note num" id="backupInfo"></p>
+    </section>
+    <section class="card">
+      <h2>Conta</h2>
+      <p class="note" id="contaInfo"></p>
+      <div class="toolbar"><button class="btn" type="button" id="logoutBtn">Sair desta conta</button></div>
+    </section>
+  </main>
+
+  <!-- SEMANA -->
+  <main id="view-semana" class="view" hidden style="display:flex;flex-direction:column;gap:20px">
+    <header><div class="eyebrow">Semana</div><h1>Agenda planejada</h1></header>
+    <section class="card agora" id="agoraCard">
+      <div class="eyebrow" id="agoraKick">Agora</div>
+      <div class="now" id="agoraNow">—</div>
+      <div class="muted" id="agoraSub"></div>
+      <div class="prog"><i id="agoraBar" style="width:0"></i></div>
+      <div class="muted" id="agoraNext"></div>
+    </section>
+    <section class="stats" id="semStats"></section>
+    <div class="chips" id="areaChips" aria-label="Destacar área"></div>
+    <section class="card" id="gridCard">
+      <h2>A semana hora a hora</h2>
+      <p class="note">Toque num bloco para ver os detalhes ou num dia para abrir a agenda dele. A linha vermelha marca a hora atual.</p>
+      <div class="chart" id="gridChart"></div>
+      <div class="tip" id="gridTip" hidden></div>
+    </section>
+    <section class="card">
+      <h2>Para onde vão as 168 horas</h2>
+      <p class="note">Horas por área na semana, sono incluído. Toque numa área para destacá-la.</p>
+      <div class="bars" id="horasArea"></div>
+    </section>
+    <section class="card" id="sonoCard">
+      <h2>Sono por noite</h2>
+      <p class="note">Horas dormidas na noite antes de cada dia. Abaixo de 7 h, a barra fica vermelha.</p>
+      <div class="chart" id="sonoChart"></div>
+    </section>
+    <section class="card">
+      <div class="block-h"><h2 id="agTitle">Agenda do dia</h2></div>
+      <div class="chips" id="agDays"></div>
+      <div style="overflow-x:auto"><table class="agenda" id="agTable"><tbody></tbody></table></div>
+    </section>
+    <section class="card">
+      <h2>O que essa rotina constrói em um ano</h2>
+      <div class="bars" id="ano"></div>
+    </section>
+  </main>
+
+  <!-- ROTINA (editor) -->
+  <main id="view-rotina" class="view" hidden style="display:flex;flex-direction:column;gap:20px">
+    <header><div class="eyebrow">Rotina</div><h1>Editar o checklist</h1></header>
+    <p class="note">Ajuste as atividades de cada dia da semana. As mudanças valem para o checklist dos próximos dias e são salvas automaticamente.</p>
+    <div class="chips" id="edDays"></div>
+    <section class="card">
+      <div class="block-h"><h2 id="edTitle">Segunda</h2><span class="note num" id="edCount"></span></div>
+      <div id="edList"></div>
+      <div class="toolbar">
+        <button class="btn primary" type="button" id="edAdd">Adicionar atividade</button>
+        <button class="btn danger" type="button" id="edReset">Voltar ao padrão deste dia</button>
+      </div>
+      <div class="alert" id="edConfirm" hidden>
+        <span>Isso troca as atividades deste dia pelas originais. O histórico continua salvo.</span>
+        <div class="toolbar" style="margin-top:8px"><button class="btn danger" type="button" id="edResetYes">Sim, voltar ao padrão</button><button class="btn" type="button" id="edResetNo">Cancelar</button></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<nav class="tabs" id="tabs" hidden aria-label="Seções"><div class="tabs-in" role="tablist">
+  <button class="tab" role="tab" data-view="hoje" aria-selected="true" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12l3 3 5-6"/></svg>Hoje</button>
+  <button class="tab" role="tab" data-view="evolucao" aria-selected="false" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 15l4-4 3 3 5-6"/></svg>Evolução</button>
+  <button class="tab" role="tab" data-view="semana" aria-selected="false" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Semana</button>
+  <button class="tab" role="tab" data-view="rotina" aria-selected="false" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13 7l4 4"/></svg>Rotina</button>
+</div></nav>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
